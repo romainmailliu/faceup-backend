@@ -9,7 +9,11 @@ var indexRouter = require("./routes/index");
 
 var app = express();
 const fileUpload = require("express-fileupload");
-app.use(fileUpload());
+app.use(
+  fileUpload({
+    useTempFiles: false,
+  }),
+);
 
 const cors = require("cors");
 app.use(cors());

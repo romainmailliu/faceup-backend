@@ -1,24 +1,30 @@
 var express = require("express");
 var router = express.Router();
 
-const uniqid = require("uniqid"); // Donne un nom aléatoire
 const cloudinary = require("cloudinary").v2;
-const fs = require("fs");
 
 router.post("/upload", async (req, res) => {
-  console.log(req.files.photoFromFront);
-  const photoPath = `./tmp/${uniqid()}.jpg`; //Route vers l'emplacement de la sauvegarde temporaire
-  const resultMove = await req.files.photoFromFront.mv(photoPath); //Sauvegarde temporaire
+  try {
+    if (!req.files || !req.files.photoFromFront) {
+      return res.status(400).json({ result: false, error: "No file uploaded" });
+    }
 
-  if (!resultMove) {
-    // Si la sauvegarde a fonctionnée
+    const file = req.files.photoFromFront;
 
-    const resultCloudinary = await cloudinary.uploader.upload(photoPath); //On stock dans Cloudinary
-    fs.unlinkSync(photoPath); //On suprime le fichier temporaire
+    const resultCloudinary = await cloudinary.uploader.upload(
+      file.tempFilePath || file.data,
+      {
+        resource_type: "image",
+      },
+    );
 
-    res.json({ result: true, url: resultCloudinary.secure_url });
-  } else {
-    res.json({ result: false, error: resultMove });
+    res.json({
+      result: true,
+      url: resultCloudinary.secure_url,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ result: false, error: error.message });
   }
 });
 
