@@ -12,10 +12,8 @@ const fileUpload = require("express-fileupload");
 app.use(
   fileUpload({
     useTempFiles: false,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   }),
 );
-
 const cors = require("cors");
 app.use(cors());
 

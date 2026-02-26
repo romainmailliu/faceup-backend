@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const cloudinary = require("cloudinary").v2;
+const streamifier = require("streamifier");
 
 router.post("/upload", async (req, res) => {
   try {
@@ -13,7 +14,7 @@ router.post("/upload", async (req, res) => {
 
     const file = req.files.photoFromFront;
 
-    const uploadStream = cloudinary.uploader.upload_stream(
+    const stream = cloudinary.uploader.upload_stream(
       { resource_type: "image" },
       (error, result) => {
         if (error) {
@@ -31,7 +32,7 @@ router.post("/upload", async (req, res) => {
       },
     );
 
-    uploadStream.end(file.data);
+    streamifier.createReadStream(file.data).pipe(stream);
   } catch (error) {
     console.error(error);
     res.status(500).json({
